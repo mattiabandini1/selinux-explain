@@ -27,7 +27,24 @@ fn main() {
     } else if let Some(text) = cli.log_text {
         println!("Text mode: Analyzing the provided log...");
         println!("Received text: {}", text);
-        // TODO: Pass the text to our SELinux parser module
+        
+        // 1. Call our parser function passing the text.
+        // We borrow the text using `&text` because the function expects a string slice (&str).
+        let parsed_result = parser::parse_avc_log(&text);
+
+        // 2. Handle the Option returned by the parser using a `match` statement.
+        match parsed_result {
+            Some(data) => {
+                // If parsing succeeded, print the extracted struct
+                // We use {:#?} for "pretty printing" the debug struct over multiple lines
+                println!("Match found! Extracted data:");
+                println!("{:#?}", data);
+            },
+            None => {
+                // If parsing failed (regex didn't match)
+                println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
+            }
+        }
         
     } else {
         // If the user runs the command without any arguments
