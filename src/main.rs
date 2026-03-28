@@ -1,4 +1,5 @@
 mod parser;
+mod explainer;
 
 use clap::Parser;
 
@@ -36,9 +37,7 @@ fn main() {
         match parsed_result {
             Some(data) => {
                 // If parsing succeeded, print the extracted struct
-                // We use {:#?} for "pretty printing" the debug struct over multiple lines
-                println!("Match found! Extracted data:");
-                println!("{:#?}", data);
+                explainer::print_explanation(&data);
             },
             None => {
                 // If parsing failed (regex didn't match)
