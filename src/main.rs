@@ -1,3 +1,5 @@
+mod parser;
+
 use clap::Parser;
 
 /// selinux-explain: A human-readable translator for SELinux AVC denials
