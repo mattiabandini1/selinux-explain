@@ -1,5 +1,8 @@
+use colored::Colorize;
+
 mod parser;
 mod explainer;
+mod reader;
 
 use clap::Parser;
 
@@ -23,8 +26,39 @@ fn main() {
     // Handle the user's input based on the provided flags
     if cli.last {
         println!("Mode '--last': Searching for the latest denial in the system log...");
-        // TODO: Call the module that reads the audit.log file
+       
+        let last_result = reader::get_last_denial("/var/log/audit/audit.log");
         
+        match last_result {
+            Ok(Some(text)) => {
+                println!("Found the latest SELinux denial!");
+                
+                // 1. Call our parser function passing the text.
+                // We borrow the text using `&text` because the function expects a string slice (&str).
+                let parsed_result = parser::parse_avc_log(&text);
+
+                // 2. Handle the Option returned by the parser using a `match` statement.
+                match parsed_result {
+                    // If parsing succeeded, print the extracted struct
+                    Some(text) => {
+                        explainer::print_explanation(&text);
+                    },
+                    None => {
+                        // If parsing failed (regex didn't match)
+                        println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
+                    }
+                }
+            },
+            Ok(None) => {
+                println!("No SELinux denials found in the log file.");
+            },
+            Err(e) => {
+                // This happens if the OS blocks us (e.g., missing sudo) or file doesn't exist
+                println!("{} {}", "Error reading the log file:".red().bold(), e);
+                println!("Tip: The audit.log file usually requires root privileges. Try running the command with 'sudo'.");
+            }
+        }
+    
     } else if let Some(text) = cli.log_text {
         println!("Text mode: Analyzing the provided log...");
         println!("Received text: {}", text);
