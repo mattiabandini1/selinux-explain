@@ -24,15 +24,11 @@ fn main() {
     let cli = Cli::parse();
 
     // Handle the user's input based on the provided flags
-    if cli.last {
-        println!("Mode '--last': Searching for the latest denial in the system log...");
-       
+    if cli.last { 
         let last_result = reader::get_last_denial("/var/log/audit/audit.log");
         
         match last_result {
-            Ok(Some(text)) => {
-                println!("Found the latest SELinux denial!");
-                
+            Ok(Some(text)) => { 
                 // 1. Call our parser function passing the text.
                 // We borrow the text using `&text` because the function expects a string slice (&str).
                 let parsed_result = parser::parse_avc_log(&text);
@@ -59,10 +55,7 @@ fn main() {
             }
         }
     
-    } else if let Some(text) = cli.log_text {
-        println!("Text mode: Analyzing the provided log...");
-        println!("Received text: {}", text);
-        
+    } else if let Some(text) = cli.log_text { 
         // 1. Call our parser function passing the text.
         // We borrow the text using `&text` because the function expects a string slice (&str).
         let parsed_result = parser::parse_avc_log(&text);
