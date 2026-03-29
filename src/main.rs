@@ -75,6 +75,6 @@ fn main() {
     } else {
         // If the user runs the command without any arguments
         println!("No arguments provided!");
-        println!("Tip: Use 'cargo run -- --help' to see available options.");
+        println!("Tip: Use 'selinux-explain --help' to see available options.");
     }
 }
