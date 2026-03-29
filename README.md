@@ -69,7 +69,7 @@ grep nginx /var/log/audit/audit.log | selinux-explain
 
 ## 📤 Example output
 >
-> **Note:** The suggestion shown below is currently generic. Context-aware suggestions based on process type, source context, and target context are actively being developed.
+> shown below is currently generic. Context-aware suggestions based on process type, source context, and target context are actively being developed.
 
 ```
 🔴 SELinux Denial Detected!
@@ -77,6 +77,7 @@ grep nginx /var/log/audit/audit.log | selinux-explain
 
 Who:  nginx
 What: Tried to 'read' the target 'index.html'
+Why:  A process with label 'httpd_t' is not allowed to access objects with label 'user_home_t'
 
 💡 Suggestion:
 Check if the process has the correct labels to access this file.
