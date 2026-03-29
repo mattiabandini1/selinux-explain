@@ -7,23 +7,29 @@ pub struct AvcData {
     pub process: String,
     pub action: String,
     pub target: String,
+    pub scontext: String,
+    pub tcontext: String,
 }
 
 /// Parses a single line of log.
 /// Returns Some(AvcData) if it's a valid SELinux AVC denial.
 /// Returns None if the line does not match the expected format.
 pub fn parse_avc_log(log_line: &str) -> Option<AvcData> {
-    let re = Regex::new(r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?name="(.*?)""#).ok()?;
+    let re = Regex::new(r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?name="(.*?)".*?scontext=(\S+).*?tcontext=(\S+)"#).ok()?;
 
     if let Some(captures) = re.captures(log_line) {
         let action = captures.get(1)?.as_str().to_string();
         let process = captures.get(2)?.as_str().to_string();
         let target = captures.get(3)?.as_str().to_string();
+        let scontext = captures.get(4)?.as_str().to_string();
+        let tcontext = captures.get(5)?.as_str().to_string();
 
         return Some(AvcData {
             process,
             action,
             target,
+            scontext,
+            tcontext,
         });
     }
     None
@@ -44,6 +50,8 @@ mod tests {
             process: "nginx".to_string(),
             action: "read".to_string(),
             target: "index.html".to_string(),
+            scontext: "system_u:system_r:httpd_t:s0".to_string(),
+            tcontext: "unconfined_u:object_r:user_home_t:s0".to_string(),
         };
 
         assert_eq!(parse_avc_log(raw_log), Some(expected));
