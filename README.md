@@ -69,7 +69,7 @@ grep nginx /var/log/audit/audit.log | selinux-explain
 
 ## 📤 Example output
 >
-> shown below is currently generic. Context-aware suggestions based on process type, source context, and target context are actively being developed.
+> **Note:** The suggestion shown below is currently generic. Context-aware suggestions based on process type, source context, and target context are actively being developed.
 
 ```
 🔴 SELinux Denial Detected!
