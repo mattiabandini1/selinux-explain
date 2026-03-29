@@ -28,7 +28,7 @@ While tools like `setroubleshoot` exist, they often:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/selinux-explain.git
+git clone https://github.com/mattiabandini1/selinux-explain.git
 cd selinux-explain
 
 # Build and run the project
