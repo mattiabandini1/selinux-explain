@@ -71,7 +71,7 @@ grep nginx /var/log/audit/audit.log | selinux-explain
 >
 > **Note:** The suggestion shown below is currently generic for unlisted process types. Context-aware suggestions for common cases (`httpd_t`, `container_t`, and more) are already implemented and actively being expanded.
 
-![selinux-explain output](assets/example-output.png)
+![selinux-explain output](assets/example_output.png)
 ---
 
 ## 🗺️ Roadmap
