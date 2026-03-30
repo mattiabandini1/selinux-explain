@@ -9,6 +9,48 @@ fn extract_type(context: &str) -> &str {
     context.split(':').nth(2).unwrap_or(context)
 }
 
+/// Returns specific actionable advice based on the combination of source type and action.
+fn get_specific_advice(source_type: &str, action: &str, target_type: &str, target: &str) -> String {
+    // We match on a tuple: (source_type, action)
+    match (source_type, action) {
+        // Case 1: Web server trying to READ or OPEN a file
+        ("httpd_t", "read") | ("httpd_t", "open") | ("httpd_t", "getattr") => {
+            format!(
+                "The web server is trying to read a file labeled '{target_type}'.\n\
+                 If this is a legitimate web file, fix its context by running:\n\
+                 `sudo chcon -t httpd_sys_content_t {target}`"
+            )
+        },
+        
+        // Case 2: Web server trying to CONNECT to a network port
+        ("httpd_t", "name_connect") => {
+            format!(
+                "The web server is trying to make an outbound network connection.\n\
+                 By default, SELinux blocks this. To allow it, run:\n\
+                 `sudo setsebool -P httpd_can_network_connect 1`"
+            )
+        },
+        
+        // Case 3: Containers (we use `_` because we care about ANY action blocked for containers)
+        ("container_t", _) => {
+            format!(
+                "A container is trying to access a host resource.\n\
+                 If you are mounting a volume, append ':z' or ':Z' to your volume path.\n\
+                 Example: `-v /host/path:/container/path:z`"
+            )
+        },
+
+        // Default fallback for any other combination
+        _ => {
+            format!(
+                "No specific advice for process '{source_type}' attempting to '{action}'.\n\
+                 Check if the process has the correct labels to access '{target_type}'.\n\
+                 Test temporarily by running: `sudo setenforce 0` (Re-enable with `setenforce 1`!)"
+            )
+        }
+    }
+}
+
 /// Takes the extracted SELinux data and prints a human-readable explanation
 pub fn print_explanation(data: &AvcData) {
     // Let's print a flashy header
@@ -34,10 +76,15 @@ pub fn print_explanation(data: &AvcData) {
         target_type.red().bold()
     );
 
-    // For now, let's print a generic suggestion. 
-    // Later we can add specific logic based on the context.
     println!("\n{}", "💡 Suggestion:".green().bold());
-    println!("Check if the process has the correct labels to access this file.");
-    println!("You can temporarily test if SELinux is the issue by running: `setenforce 0`");
-    println!("(But remember to re-enable it with `setenforce 1`!)\n");
+    // Call our new helper function, passing the action as well!
+    let advice = get_specific_advice(
+        source_type, 
+        data.action.as_str(), 
+        target_type, 
+        &data.target
+    );
+    
+    // Print the tailored advice
+    println!("{}", advice);    
 }

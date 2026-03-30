@@ -29,7 +29,7 @@ fn process_and_explain_log(log_line: &str) {
     // 2. Handle the Option returned by the parser using a `match` statement.
     match parsed_result {
         Some(data) => {
-            // If parsing succeeded, print the extracted struct
+            // If parsing succeeded, print the extracted struct 
             explainer::print_explanation(&data);
         },            
         None => {
