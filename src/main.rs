@@ -19,6 +19,27 @@ struct Cli {
     log_text: Option<String>,
 }
 
+/// Helper function to avoid duplicating the parsing and explaining logic.
+/// It takes a raw log string, parses it, and prints the human-readable explanation or an error.
+fn process_and_explain_log(log_line: &str) {
+    // 1. Call our parser function passing the text.
+    // We borrow the text using `&text` because the function expects a string slice (&str).
+    let parsed_result = parser::parse_avc_log(log_line);
+
+    // 2. Handle the Option returned by the parser using a `match` statement.
+    match parsed_result {
+        Some(data) => {
+            // If parsing succeeded, print the extracted struct
+            explainer::print_explanation(&data);
+        },            
+        None => {
+            // If parsing failed (regex didn't match)
+            println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
+        }
+    }
+
+}
+
 fn main() {
     // This single line parses the user's terminal input into our Cli struct
     let cli = Cli::parse();
@@ -29,21 +50,7 @@ fn main() {
         
         match last_result {
             Ok(Some(text)) => { 
-                // 1. Call our parser function passing the text.
-                // We borrow the text using `&text` because the function expects a string slice (&str).
-                let parsed_result = parser::parse_avc_log(&text);
-
-                // 2. Handle the Option returned by the parser using a `match` statement.
-                match parsed_result {
-                    // If parsing succeeded, print the extracted struct
-                    Some(text) => {
-                        explainer::print_explanation(&text);
-                    },
-                    None => {
-                        // If parsing failed (regex didn't match)
-                        println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
-                    }
-                }
+                process_and_explain_log(&text);    
             },
             Ok(None) => {
                 println!("No SELinux denials found in the log file.");
@@ -56,22 +63,7 @@ fn main() {
         }
     
     } else if let Some(text) = cli.log_text { 
-        // 1. Call our parser function passing the text.
-        // We borrow the text using `&text` because the function expects a string slice (&str).
-        let parsed_result = parser::parse_avc_log(&text);
-
-        // 2. Handle the Option returned by the parser using a `match` statement.
-        match parsed_result {
-            Some(data) => {
-                // If parsing succeeded, print the extracted struct
-                explainer::print_explanation(&data);
-            },
-            None => {
-                // If parsing failed (regex didn't match)
-                println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
-            }
-        }
-        
+            process_and_explain_log(&text);
     } else {
         // If the user runs the command without any arguments
         println!("No arguments provided!");
