@@ -18,7 +18,7 @@ fn get_specific_advice(source_type: &str, action: &str, target_type: &str, targe
             format!(
                 "The web server is trying to read a file labeled '{target_type}'.\n\
                  If this is a legitimate web file, fix its context by running:\n\
-                 `sudo chcon -t httpd_sys_content_t {target}`"
+                 `sudo chcon -t httpd_sys_content_t /full/path/to/{target}`"
             )
         },
         
