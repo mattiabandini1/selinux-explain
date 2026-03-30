@@ -93,8 +93,9 @@ Check if the process has the correct labels to access this file.
 - [x] Human-readable output with color
 - [x] `--last` flag to analyze the latest denial from `/var/log/audit/audit.log`
 - [x] `--text` flag to analyze a specific log line
+- [x] Context-aware suggestions for common cases (httpd_t, container_t).
+- [ ] Extended suggestion engine via external `rules.toml`.
 - [ ] Stdin / pipe support
-- [ ] Context-aware suggestions (based on process type and target)
 - [ ] Pre-compiled binaries via GitHub Releases
 - [ ] RPM package / COPR repository
 
