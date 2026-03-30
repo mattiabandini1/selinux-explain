@@ -10,20 +10,20 @@ fn extract_type(context: &str) -> &str {
 }
 
 /// Returns specific actionable advice based on the combination of source type and action.
-fn get_specific_advice(source_type: &str, action: &str, target_type: &str, target: &str) -> String {
+fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str) -> String {
     // We match on a tuple: (source_type, action)
-    match (source_type, action) {
-        // Case 1: Web server trying to READ or OPEN a file
-        ("httpd_t", "read") | ("httpd_t", "open") | ("httpd_t", "getattr") => {
+    match (source_type, action, tclass) {
+        // Case 1: Web server trying to READ files or directories
+        ("httpd_t", "read" | "open" | "getattr", "file" | "dir") => {
             format!(
-                "The web server is trying to read a file labeled '{target_type}'.\n\
-                 If this is a legitimate web file, fix its context by running:\n\
-                 `sudo chcon -t httpd_sys_content_t </path/to/{target}>`"
+                "The web server is trying to read a file or directory labeled '{target_type}'.\n\
+                Fix its context with: `sudo restorecon -Rv </path/to/{target}>`\n\
+                Or set it manually: `sudo chcon -t httpd_sys_content_t </path/to/{target}>`"
             )
         },
         
-        // Case 2: Web server trying to CONNECT to a network port
-        ("httpd_t", "name_connect") => {
+        // Case 2: Web server trying to CONNECT to a network socket
+        ("httpd_t", "name_connect", "tcp_socket") => {
             format!(
                 "The web server is trying to make an outbound network connection.\n\
                  By default, SELinux blocks this. To allow it, run:\n\
@@ -32,7 +32,7 @@ fn get_specific_advice(source_type: &str, action: &str, target_type: &str, targe
         },
         
         // Case 3: Containers (we use `_` because we care about ANY action blocked for containers)
-        ("container_t", _) => {
+        ("container_t", _, _) => {
             format!(
                 "A container is trying to access a host resource.\n\
                  If you are mounting a volume, append ':z' or ':Z' to your volume path.\n\
@@ -43,7 +43,7 @@ fn get_specific_advice(source_type: &str, action: &str, target_type: &str, targe
         // Default fallback for any other combination
         _ => {
             format!(
-                "No specific advice for process '{source_type}' attempting to '{action}'.\n\
+                "No specific advice for process '{source_type}' attempting to '{action}' on a '{tclass}'.\n\
                  Check if the process has the correct labels to access '{target_type}'.\n\
                  Test temporarily by running: `sudo setenforce 0` (Re-enable with `setenforce 1`!)"
             )
@@ -80,7 +80,8 @@ pub fn print_explanation(data: &AvcData) {
     // Call our new helper function, passing the action as well!
     let advice = get_specific_advice(
         source_type, 
-        data.action.as_str(), 
+        data.action.as_str(),
+        data.tclass.as_str(),
         target_type, 
         &data.target
     );
