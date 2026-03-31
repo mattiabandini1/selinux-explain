@@ -1,3 +1,4 @@
+use std::io::{self, Read, IsTerminal};
 use colored::Colorize;
 
 mod parser;
@@ -64,6 +65,30 @@ fn main() {
     
     } else if let Some(text) = cli.log_text { 
             process_and_explain_log(&text);
+    } else if !io::stdin().is_terminal() {
+        // We have data coming from a pipe
+        let mut input = String::new();
+
+        // Read all piped data into our string
+        if let Err(e) = io::stdin().read_to_string(&mut input) {
+            eprintln!("Error reading from standard input: {}", e);
+            return;
+        }
+
+        let mut found = false;
+
+        // Process each line that looks like an SELinux denial
+        for line in input.lines() {
+            if line.contains("avc: denied") || line.contains("type=AVC") {
+                println!("\n{}", "Processing piped log line:".blue().bold());
+                process_and_explain_log(line);
+                found = true;
+            }
+        }
+        if !found {
+            println!("No SELinux denials found in the piped input.");
+        }
+
     } else {
         // If the user runs the command without any arguments
         println!("No arguments provided!");
