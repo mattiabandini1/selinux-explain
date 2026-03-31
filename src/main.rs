@@ -80,7 +80,6 @@ fn main() {
         // Process each line that looks like an SELinux denial
         for line in input.lines() {
             if line.contains("avc: denied") || line.contains("type=AVC") {
-                println!("\n{}", "Processing piped log line:".blue().bold());
                 process_and_explain_log(line);
                 found = true;
             }
