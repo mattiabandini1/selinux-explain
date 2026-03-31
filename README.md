@@ -62,7 +62,7 @@ selinux-explain --text "type=AVC msg=audit(1612345678.123:456): avc: denied { re
 **Pipe directly from the audit log:**
 
 ```bash
-grep nginx /var/log/audit/audit.log | selinux-explain
+grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 ```
 
 ---
@@ -82,8 +82,8 @@ grep nginx /var/log/audit/audit.log | selinux-explain
 - [x] `--last` flag to analyze the latest denial from `/var/log/audit/audit.log`
 - [x] `--text` flag to analyze a specific log line
 - [x] Context-aware suggestions for common cases (httpd_t, container_t).
+- [x] Stdin / pipe support
 - [ ] Extended suggestion engine via external `rules.toml`.
-- [ ] Stdin / pipe support
 - [ ] Pre-compiled binaries via GitHub Releases
 - [ ] RPM package / COPR repository
 
