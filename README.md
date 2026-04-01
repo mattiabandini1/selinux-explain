@@ -30,6 +30,15 @@ When SELinux blocks something, most people either paste incomprehensible logs on
 
 ## 🚀 Installation
 
+### Download pre-compiled binary (recommended)
+
+Head to the [Releases page](https://github.com/mattiabandini1/selinux-explain/releases) and download the latest binary for your architecture, then:
+
+```bash
+chmod +x selinux-explain
+sudo mv selinux-explain /usr/local/bin/
+```
+
 ### Build from source
 
 ```bash
@@ -40,8 +49,6 @@ sudo cp target/release/selinux-explain /usr/local/bin/
 ```
 
 That's it. The binary is now available system-wide.
-
-> Pre-compiled binaries are coming soon via GitHub Releases.
 
 ---
 
@@ -83,8 +90,8 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 - [x] `--text` flag to analyze a specific log line
 - [x] Context-aware suggestions for common cases (httpd_t, container_t).
 - [x] Stdin / pipe support
+- [X] Pre-compiled binaries via GitHub Releases
 - [ ] Extended suggestion engine via external `rules.toml`.
-- [ ] Pre-compiled binaries via GitHub Releases
 - [ ] RPM package / COPR repository
 
 ---
