@@ -91,14 +91,27 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 - [x] Context-aware suggestions for common cases (httpd_t, container_t).
 - [x] Stdin / pipe support
 - [X] Pre-compiled binaries via GitHub Releases
-- [ ] Extended suggestion engine via external `rules.toml`.
+- [x] Extended suggestion engine via external `rules.toml`.
 - [ ] RPM package / COPR repository
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! If you find a log that doesn't parse correctly, please open an issue with the raw log string.
+The suggestion engine is powered by a community-curated `rules.toml` file. If you have a real-world SELinux denial that isn't covered, you can contribute a new rule without touching any Rust code.
+
+Each rule needs four fields:
+
+```toml
+[[rules]]
+source_type = "the_process_t"    # SELinux type of the blocked process
+action = "read"                  # the denied action (read, write, name_connect...)
+tclass = "file"                  # the object class (file, dir, tcp_socket...)
+suggestion = "Human-readable explanation of what happened."
+fix = "The exact command to fix it."
+```
+
+Open a Pull Request adding your rule to `rules.toml`, or open an Issue with the raw log line and the fix that worked for you.
 
 ---
 
