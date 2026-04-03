@@ -4,6 +4,7 @@ use colored::Colorize;
 mod parser;
 mod explainer;
 mod reader;
+mod rules;
 
 use clap::Parser;
 
