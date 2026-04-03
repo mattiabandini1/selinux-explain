@@ -1,5 +1,6 @@
 use colored::Colorize;
 use crate::parser::AvcData;
+use crate::rules;
 
 /// Helper function to extract the 3rd part of a SELinux context (the Type).
 /// Example: "system_u:system_r:httpd_t:s0" -> "httpd_t"
@@ -11,7 +12,17 @@ fn extract_type(context: &str) -> &str {
 
 /// Returns specific actionable advice based on the combination of source type and action.
 fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str) -> String {
-    // We match on a tuple: (source_type, action)
+    // Try loading rules.toml — first from system path, then local
+    let rules_file = rules::load_rules("/etc/selinux-explain/rules.toml")
+        .or_else(|| rules::load_rules("rules.toml"));
+
+    if let Some(ref rf) = rules_file {
+        if let Some(rule) = rules::find_rule(rf, source_type, action, tclass) {
+            return format!("{}\n{}", rule.suggestion, rule.fix);
+        }
+    }
+
+    // Fallback to hardcoded match
     match (source_type, action, tclass) {
         // Case 1: Web server trying to READ files or directories
         ("httpd_t", "read" | "open" | "getattr", "file" | "dir") => {
