@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+const DEFAULT_RULES: &str = include_str!("../rules.toml");
+
 #[derive(Debug, Deserialize)]
 pub struct Rule {
     pub source_type: String,
@@ -19,6 +21,19 @@ pub struct RulesFile {
 pub fn load_rules(path: &str) -> Option<RulesFile> {
     let content = std::fs::read_to_string(path).ok()?;
     toml::from_str(&content).ok()
+}
+
+/// Loads rules with fallback priority:
+/// 1. /etc/selinux-explain/rules.toml (user custom)
+/// 2. ./rules.toml (local, for development)
+/// 3. Built-in rules embedded in the binary at compile time
+pub fn load_rules_with_fallback() -> RulesFile {
+    load_rules("/etc/selinux-explain/rules.toml")
+        .or_else(|| load_rules("rules.toml"))
+        .unwrap_or_else(|| {
+            toml::from_str(DEFAULT_RULES)
+                .expect("Built-in rules.toml is invalid — this is a bug, please report it")
+        })
 }
 
 /// Searches for a matching rule given source_type, action, tclass.
