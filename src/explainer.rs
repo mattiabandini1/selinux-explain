@@ -12,14 +12,11 @@ fn extract_type(context: &str) -> &str {
 
 /// Returns specific actionable advice based on the combination of source type and action.
 fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str) -> String {
-    // Try loading rules.toml — first from system path, then local
-    let rules_file = rules::load_rules("/etc/selinux-explain/rules.toml")
-        .or_else(|| rules::load_rules("rules.toml"));
+    // Load rules with fallback: system path → local file → embedded binary
+    let rules_file = rules::load_rules_with_fallback();
 
-    if let Some(ref rf) = rules_file {
-        if let Some(rule) = rules::find_rule(rf, source_type, action, tclass) {
-            return format!("{}\n{}", rule.suggestion, rule.fix);
-        }
+    if let Some(rule) = rules::find_rule(&rules_file, source_type, action, tclass) {
+        return format!("{}\n{}", rule.suggestion, rule.fix);
     }
 
     // Fallback to hardcoded match
