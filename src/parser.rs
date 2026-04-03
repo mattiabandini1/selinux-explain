@@ -16,7 +16,7 @@ pub struct AvcData {
 /// Returns Some(AvcData) if it's a valid SELinux AVC denial.
 /// Returns None if the line does not match the expected format.
 pub fn parse_avc_log(log_line: &str) -> Option<AvcData> {
-    let re = Regex::new(r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?name="(.*?)".*?scontext=(\S+).*?tcontext=(\S+).*?tclass=(\S+)"#).ok()?;
+    let re = Regex::new(r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?name="?(.*?)"?\s.*?scontext=(\S+).*?tcontext=(\S+).*?tclass=(\S+)"#).ok()?;
 
     if let Some(captures) = re.captures(log_line) {
         let action = captures.get(1)?.as_str().to_string();
