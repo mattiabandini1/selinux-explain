@@ -111,6 +111,8 @@ fix = "The exact command to fix it."
 
 Open a Pull Request adding your rule to `rules.toml`, or open an Issue with the raw log line and the fix that worked for you.
 
+**System-wide overrides:** You can create your own custom rule file at `/etc/selinux-explain/rules.toml`. If found, the tool will prioritize it over the embedded rules.
+
 ---
 
 <p align="center">
