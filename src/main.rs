@@ -31,7 +31,7 @@ fn process_and_explain_log(log_line: &str) {
             explainer::print_explanation(&data);
         },            
         None => {
-            println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
+            println!("Could not parse the log. Are you sure it is a valid SELinux AVC denial?");
         }
     }
 
