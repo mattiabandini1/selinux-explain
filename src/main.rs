@@ -31,7 +31,7 @@ fn process_and_explain_log(log_line: &str) {
             explainer::print_explanation(&data);
         },            
         None => {
-            println!("Could not parse the log. Are you sure it is a valid SELinux AVC denial?");
+            eprintln!("Could not parse the log. Are you sure it is a valid SELinux AVC denial?");
         }
     }
 
@@ -48,12 +48,12 @@ fn main() {
                 process_and_explain_log(&text);    
             },
             Ok(None) => {
-                println!("No SELinux denials found in the log file.");
+                eprintln!("No SELinux denials found in the log file.");
             },
             Err(e) => {
                 // This happens if the OS blocks us (e.g., missing sudo) or file doesn't exist
-                println!("{} {}", "Error reading the log file:".red().bold(), e);
-                println!("Tip: The audit.log file usually requires root privileges. Try running the command with 'sudo'.");
+                eprintln!("{} {}", "Error reading the log file:".red().bold(), e);
+                eprintln!("Tip: The audit.log file usually requires root privileges. Try running the command with 'sudo'.");
             }
         }
     
@@ -78,7 +78,7 @@ fn main() {
             }
         }
         if !found {
-            println!("No SELinux denials found in the piped input.");
+            eprintln!("No SELinux denials found in the piped input.");
         }
 
     } else {
