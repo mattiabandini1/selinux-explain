@@ -75,8 +75,6 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 ---
 
 ## 📤 Example output
->
-> **Note:** The suggestion shown below is currently generic for unlisted process types. Context-aware suggestions for common cases (`httpd_t`, `container_t`, and more) are already implemented and actively being expanded.
 
 ![selinux-explain output](assets/example_output.png)
 
@@ -90,7 +88,7 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 - [x] `--text` flag to analyze a specific log line
 - [x] Context-aware suggestions for common cases (httpd_t, container_t).
 - [x] Stdin / pipe support
-- [X] Pre-compiled binaries via GitHub Releases
+- [x] Pre-compiled binaries via GitHub Releases
 - [x] Extended suggestion engine via external `rules.toml`.
 - [ ] RPM package / COPR repository
 
