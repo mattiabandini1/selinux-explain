@@ -24,18 +24,13 @@ struct Cli {
 /// Helper function to avoid duplicating the parsing and explaining logic.
 /// It takes a raw log string, parses it, and prints the human-readable explanation or an error.
 fn process_and_explain_log(log_line: &str) {
-    // 1. Call our parser function passing the text.
-    // We borrow the text using `&text` because the function expects a string slice (&str).
     let parsed_result = parser::parse_avc_log(log_line);
 
-    // 2. Handle the Option returned by the parser using a `match` statement.
     match parsed_result {
         Some(data) => {
-            // If parsing succeeded, print the extracted struct 
             explainer::print_explanation(&data);
         },            
         None => {
-            // If parsing failed (regex didn't match)
             println!("Could not parse the log. Are you sure is a valid SELinux AVC denial?");
         }
     }
@@ -43,10 +38,8 @@ fn process_and_explain_log(log_line: &str) {
 }
 
 fn main() {
-    // This single line parses the user's terminal input into our Cli struct
     let cli = Cli::parse();
 
-    // Handle the user's input based on the provided flags
     if cli.last { 
         let last_result = reader::get_last_denial("/var/log/audit/audit.log");
         
@@ -67,7 +60,6 @@ fn main() {
     } else if let Some(text) = cli.log_text { 
             process_and_explain_log(&text);
     } else if !io::stdin().is_terminal() {
-        // We have data coming from a pipe
         let mut input = String::new();
 
         // Read all piped data into our string
@@ -90,7 +82,6 @@ fn main() {
         }
 
     } else {
-        // If the user runs the command without any arguments
         println!("No arguments provided!");
         println!("Tip: Use 'selinux-explain --help' to see available options.");
     }
