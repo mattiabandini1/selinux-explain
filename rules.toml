@@ -3,7 +3,9 @@
 # Community-curated from Red Hat/Fedora docs
 # ─────────────────────────────────────────────
 
-# 1. Web server legge file con label sbagliata (es. file copiato da ~/)
+version = "1.0.0"
+
+# 1. Web server reads a file with the wrong label (e.g. file copied from ~/)
 [[rules]]
 source_type = "httpd_t"
 action = "read"
@@ -11,7 +13,7 @@ tclass = "file"
 suggestion = "The web server is trying to read a file with the wrong SELinux label (e.g. user_home_t instead of httpd_sys_content_t). This often happens after copying files from a home directory."
 fix = "sudo restorecon -Rv </path/to/file>  # or: sudo semanage fcontext -a -t httpd_sys_content_t \"/your/dir(/.*)?\" && sudo restorecon -R /your/dir"
 
-# 2. Web server scrive su file/directory (upload, cache, log app)
+# 2. Web server writes to a file/directory (upload, cache, app log)
 [[rules]]
 source_type = "httpd_t"
 action = "write"
@@ -19,8 +21,7 @@ tclass = "file"
 suggestion = "The web server is trying to write to a file or directory that is not labeled for write access. Common with upload folders or app-generated files."
 fix = "sudo semanage fcontext -a -t httpd_sys_rw_content_t \"/your/writable/dir(/.*)?\" && sudo restorecon -R /your/writable/dir"
 
-# 3. Web server tenta connessione di rete in uscita (proxy, API calls)
-# 4. Web server tenta connessione a un database (MySQL/PostgreSQL)
+# 3. Web server attempts outbound network connection (proxy, API calls) or database connection (MySQL/PostgreSQL)
 [[rules]]
 source_type = "httpd_t"
 action = "name_connect"
@@ -28,7 +29,7 @@ tclass = "tcp_socket"
 suggestion = "The web server is trying to make an outbound network connection."
 fix = "For general connections: sudo setsebool -P httpd_can_network_connect 1\nFor database connections only: sudo setsebool -P httpd_can_network_connect_db 1"
 
-# 5. httpd/nginx tenta di fare bind su porta non standard
+# 4. httpd/nginx attempts to bind to a non-standard port
 [[rules]]
 source_type = "httpd_t"
 action = "name_bind"
@@ -36,7 +37,7 @@ tclass = "tcp_socket"
 suggestion = "The web server is trying to bind to a port not labeled as http_port_t. Common when using non-standard ports like 8081, 9000, etc."
 fix = "sudo semanage port -a -t http_port_t -p tcp <PORT>  # then restart the service"
 
-# 6. httpd legge da una directory NFS montata
+# 5. httpd reads from a mounted NFS directory
 [[rules]]
 source_type = "httpd_t"
 action = "read"
@@ -44,7 +45,7 @@ tclass = "dir"
 suggestion = "The web server is trying to read from a directory labeled nfs_t or cifs_t. SELinux blocks this by default to prevent data leaks across network mounts."
 fix = "sudo setsebool -P httpd_use_nfs 1  # for NFS\n# or: sudo setsebool -P httpd_use_cifs 1  # for CIFS/Samba"
 
-# 7. Contenitore accede a risorsa host (volume mount senza :z)
+# 6. Container accesses a host resource (volume mount without :z)
 [[rules]]
 source_type = "container_t"
 action = "write"
@@ -52,7 +53,7 @@ tclass = "dir"
 suggestion = "A container is trying to write to a host directory. The volume is missing the SELinux relabeling flag."
 fix = "Add ':z' (shared) or ':Z' (private) to your volume mount:\n  -v /host/path:/container/path:Z"
 
-# 8. MySQL/MariaDB con data directory spostata
+# 7. MySQL/MariaDB with a moved data directory
 [[rules]]
 source_type = "mysqld_t"
 action = "write"
@@ -60,7 +61,7 @@ tclass = "dir"
 suggestion = "MySQL/MariaDB is trying to write to a directory that is not labeled mysqld_db_t. This happens when the data directory is moved from the default /var/lib/mysql."
 fix = "sudo semanage fcontext -a -t mysqld_db_t \"/new/data/dir(/.*)?\" && sudo restorecon -R /new/data/dir"
 
-# 9. MySQL tenta bind su porta non standard
+# 8. MySQL attempts to bind to a non-standard port
 [[rules]]
 source_type = "mysqld_t"
 action = "name_bind"
@@ -68,7 +69,7 @@ tclass = "tcp_socket"
 suggestion = "MySQL/MariaDB is trying to bind to a port not labeled for MySQL. This happens when using a non-default port (default is 3306)."
 fix = "sudo semanage port -a -t mysqld_port_t -p tcp <PORT>"
 
-# 10. Samba non riesce a scrivere su una share
+# 9. Samba fails to write to a share
 [[rules]]
 source_type = "smbd_t"
 action = "write"
@@ -76,7 +77,7 @@ tclass = "dir"
 suggestion = "Samba is trying to write to a directory not labeled as samba_share_t. Read access may work but writes are blocked."
 fix = "sudo semanage fcontext -a -t samba_share_t \"/your/share(/.*)?\" && sudo restorecon -R /your/share\n# Also enable: sudo setsebool -P samba_export_all_rw 1"
 
-# 11. vsftpd non riesce a scrivere nella directory upload
+# 10. vsftpd fails to write to the upload directory
 [[rules]]
 source_type = "ftpd_t"
 action = "write"
@@ -84,7 +85,7 @@ tclass = "dir"
 suggestion = "The FTP server is trying to write to a directory not labeled for FTP uploads (needs public_content_rw_t)."
 fix = "sudo semanage fcontext -a -t public_content_rw_t \"/ftpdata(/.*)?\" && sudo restorecon -R /ftpdata\n# For anonymous uploads also run: sudo setsebool -P allow_ftpd_anon_write 1"
 
-# 12. sshd legge chiavi SSH con label errata
+# 11. sshd reads SSH keys with incorrect labels
 [[rules]]
 source_type = "sshd_t"
 action = "read"
