@@ -16,26 +16,31 @@ pub struct AvcData {
 /// Returns Some(AvcData) if it's a valid SELinux AVC denial.
 /// Returns None if the line does not match the expected format.
 pub fn parse_avc_log(log_line: &str) -> Option<AvcData> {
-    let re = Regex::new(r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?name="?(.*?)"?\s.*?scontext=(\S+).*?tcontext=(\S+).*?tclass=(\S+)"#).ok()?;
+    let base_re = Regex::new(
+        r#"denied\s*\{\s*(.*?)\s*\}.*?comm="(.*?)".*?scontext=(\S+).*?tcontext=(\S+).*?tclass=(\S+)"#
+    ).ok()?;
 
-    if let Some(captures) = re.captures(log_line) {
-        let action = captures.get(1)?.as_str().to_string();
-        let process = captures.get(2)?.as_str().to_string();
-        let target = captures.get(3)?.as_str().to_string();
-        let scontext = captures.get(4)?.as_str().to_string();
-        let tcontext = captures.get(5)?.as_str().to_string();
-        let tclass = captures.get(6)?.as_str().to_string();
+    let captures = base_re.captures(log_line)?;
 
-        return Some(AvcData {
-            process,
-            action,
-            target,
-            scontext,
-            tcontext,
-            tclass,
-        });
-    }
-    None
+    let action = captures.get(1)?.as_str().to_string();
+    let process = captures.get(2)?.as_str().to_string();
+    let scontext = captures.get(3)?.as_str().to_string();
+    let tcontext = captures.get(4)?.as_str().to_string();
+    let tclass = captures.get(5)?.as_str().to_string();
+
+    let name_re = Regex::new(r#"\bname="?([^"\s]+)"?"#).ok()?;
+    let target = name_re.captures(log_line)
+        .and_then(|c| c.get(1))
+        .map_or("unknown".to_string(), |m| m.as_str().to_string());
+
+    Some(AvcData {
+        process,
+        action,
+        target,
+        scontext,
+        tcontext,
+        tclass,
+    })
 }
 
 /// --- UNIT TESTS ---
@@ -65,5 +70,19 @@ mod tests {
     fn test_parse_invalid_log() {
         let bad_log = "Just a random systemd log, nothing to see here.";
         assert_eq!(parse_avc_log(bad_log), None);
+    }
+
+    #[test]
+    fn test_parse_log_without_name() {
+        let log_line = "type=AVC msg=audit(1612345678.123:456): avc:  denied  { name_bind } for  pid=1234 comm=\"httpd\" port=8080 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:unreserved_port_t:s0 tclass=tcp_socket";
+        let expected = AvcData {
+            process: "httpd".to_string(),
+            action: "name_bind".to_string(),
+            target: "unknown".to_string(),
+            scontext: "system_u:system_r:httpd_t:s0".to_string(),
+            tcontext: "system_u:object_r:unreserved_port_t:s0".to_string(),
+            tclass: "tcp_socket".to_string(),
+        };
+        assert_eq!(parse_avc_log(log_line), Some(expected));
     }
 }
