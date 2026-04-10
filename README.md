@@ -90,6 +90,7 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 - [x] Stdin / pipe support
 - [x] Pre-compiled binaries via GitHub Releases
 - [x] Extended suggestion engine via external `rules.toml`.
+- [ ] `--report` flag to generate a ready-to-paste rule template for unmatched denials
 - [ ] RPM package / COPR repository
 
 ---
