@@ -11,7 +11,7 @@ fn extract_type(context: &str) -> &str {
 }
 
 /// Returns specific actionable advice based on the combination of source type and action.
-fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str) -> String {
+fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str, report: bool) -> String {
     // Load rules with fallback: system path → local file → embedded binary
     let rules_file = rules::load_rules_with_fallback();
 
@@ -50,17 +50,29 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
 
         // Default fallback for any other combination
         _ => {
-            format!(
-                "No specific advice for process '{source_type}' attempting to '{action}' on a '{tclass}'.\n\
-                 Check if the process has the correct labels to access '{target_type}'.\n\
-                 Test temporarily by running: `sudo setenforce 0` (Re-enable with `setenforce 1`!)"
-            )
+            let mut advice = format!(
+                "No specific advice for process '{}' attempting to '{}' on a '{}'.\n\
+                 Check if the process has the correct labels to access '{}'.",
+                source_type, action, tclass, target_type
+            );
+
+            if report {
+                let url = generate_issue_url(source_type, action, tclass);
+                advice.push_str(&format!(
+                    "\n\n{}\n{}\n{}",
+                    "This denial has no rule yet. Help improve selinux-explain!".yellow().bold(),
+                    "Open this link to submit a pre-filled GitHub issue:".yellow(),
+                    url.cyan().underline()
+                ));
+            }
+
+            advice
         }
     }
 }
 
 /// Takes the extracted SELinux data and prints a human-readable explanation
-pub fn print_explanation(data: &AvcData) {
+pub fn print_explanation(data: &AvcData, report: bool) {
     // Let's print a flashy header
     println!("\n{}", "🚨 SELinux Denial Detected!".red().bold());
     println!("{}", "=============================".red());
@@ -91,9 +103,54 @@ pub fn print_explanation(data: &AvcData) {
         data.action.as_str(),
         data.tclass.as_str(),
         target_type, 
-        &data.target
+        &data.target,
+        report,
     );
     
     // Print the tailored advice
     println!("{}", advice);    
+}
+
+/// Minimal URL encoder for GitHub issue query parameters.
+fn url_encode(s: &str) -> String {
+    s.replace('%', "%25")
+     .replace(' ', "%20")
+     .replace('\n', "%0A")
+     .replace('"', "%22")
+     .replace('[', "%5B")
+     .replace(']', "%5D")
+     .replace('#', "%23")
+     .replace(':', "%3A")
+     .replace('=', "%3D")
+     .replace('/', "%2F")
+     .replace('?', "%3F")
+     .replace('&', "%26")
+}
+
+/// Generates a pre-filled GitHub issue URL for a denial with no matching rule.
+fn generate_issue_url(source_type: &str, action: &str, tclass: &str) -> String {
+    let title = format!("New rule: {} {} {}", source_type, action, tclass);
+    let body = format!(
+        "## New rule suggestion\n\n\
+        I encountered a SELinux denial not covered by `rules.toml`.\n\n\
+```toml\n\
+        [[rules]]\n\
+        source_type = \"{}\"\n\
+        action = \"{}\"\n\
+        tclass = \"{}\"\n\
+        suggestion = \"TODO: describe what is happening\"\n\
+        fix = \"TODO: add the fix command\"\n\
+```\n\n\
+        **What I was doing when the denial occurred:**\n\
+        <!-- describe the context -->\n\n\
+        **Fix that worked for me (if any):**\n\
+        <!-- add it here so it can be included in the next release -->",
+        source_type, action, tclass
+    );
+
+    format!(
+        "https://github.com/mattiabandini1/selinux-explain/issues/new?title={}&body={}",
+        url_encode(&title),
+        url_encode(&body)
+    )
 }
