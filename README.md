@@ -72,6 +72,16 @@ selinux-explain --text "type=AVC msg=audit(1612345678.123:456): avc: denied { re
 grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 ```
 
+**Report an unmatched denial to help improve the rule database:**
+
+```bash
+selinux-explain --report --last
+# or combined with --text
+selinux-explain --report --text "type=AVC msg=audit(...)"
+```
+
+If the denial has no matching rule, `--report` generates a pre-filled GitHub issue link with the rule template already populated. Open it in your browser and hit Submit — no code required.
+
 ---
 
 ## 📤 Example output
@@ -90,7 +100,7 @@ grep "avc: denied" /var/log/audit/audit.log | selinux-explain
 - [x] Stdin / pipe support
 - [x] Pre-compiled binaries via GitHub Releases
 - [x] Extended suggestion engine via external `rules.toml`.
-- [ ] `--report` flag to generate a ready-to-paste rule template for unmatched denials
+- [x] `--report` flag to generate a ready-to-paste rule template for unmatched denials
 - [ ] RPM package / COPR repository
 
 ---
