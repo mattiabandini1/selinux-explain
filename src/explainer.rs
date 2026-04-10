@@ -58,11 +58,15 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
 
             if report {
                 let url = generate_issue_url(source_type, action, tclass);
+
+                let link_text = "Click here to open GitHub and create new issue with this rule.".underline().bold();
+                let clickable_link = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, link_text);
+
                 advice.push_str(&format!(
-                    "\n\n{}\n{}\n{}",
+                    "\n\n\n{}{}\n{}",
+                    "⚠️ ".yellow(),
                     "This denial has no rule yet. Help improve selinux-explain!".yellow().bold(),
-                    "Open this link to submit a pre-filled GitHub issue:".yellow(),
-                    url.cyan().underline()
+                    clickable_link
                 ));
             }
 
