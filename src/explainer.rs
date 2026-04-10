@@ -131,23 +131,9 @@ fn url_encode(s: &str) -> String {
 fn generate_issue_url(source_type: &str, action: &str, tclass: &str) -> String {
     let title = format!("New rule: {} {} {}", source_type, action, tclass);
     let body = format!(
-        "## New rule suggestion\n\n\
-        I encountered a SELinux denial not covered by `rules.toml`.\n\n\
-```toml\n\
-        [[rules]]\n\
-        source_type = \"{}\"\n\
-        action = \"{}\"\n\
-        tclass = \"{}\"\n\
-        suggestion = \"TODO: describe what is happening\"\n\
-        fix = \"TODO: add the fix command\"\n\
-```\n\n\
-        **What I was doing when the denial occurred:**\n\
-        <!-- describe the context -->\n\n\
-        **Fix that worked for me (if any):**\n\
-        <!-- add it here so it can be included in the next release -->",
+        "## New rule suggestion\n\nI encountered a SELinux denial not covered by `rules.toml`.\n\n```toml\n[[rules]]\nsource_type = \"{}\"\naction = \"{}\"\ntclass = \"{}\"\nsuggestion = \"TODO: describe what is happening\"\nfix = \"TODO: add the fix command\"\n```\n\n**What I was doing when the denial occurred:**\n<!-- describe the context -->\n\n**Fix that worked for me (if any):**\n<!-- add it here so it can be included in the next release -->",
         source_type, action, tclass
     );
-
     format!(
         "https://github.com/mattiabandini1/selinux-explain/issues/new?title={}&body={}",
         url_encode(&title),
