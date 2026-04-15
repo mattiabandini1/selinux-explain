@@ -11,6 +11,10 @@
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>
 </p>
 
+<p align="center">
+  <img src="assets/demo.gif" alt="selinux-explain demo" width="100%"/>
+</p>
+
 ---
 
 ## 🤔 Why this tool?
@@ -81,12 +85,6 @@ selinux-explain --report --text "type=AVC msg=audit(...)"
 ```
 
 If the denial has no matching rule, `--report` generates a pre-filled GitHub issue link with the rule template already populated. Open it in your browser and hit Submit — no code required.
-
----
-
-## 📤 Example output
-
-![selinux-explain output](assets/example_output.png)
 
 ---
 
