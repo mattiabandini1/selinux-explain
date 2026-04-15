@@ -14,6 +14,9 @@
 <p align="center">
   <img src="assets/demo.gif" alt="selinux-explain demo" width="100%"/>
 </p>
+<p align="center">
+  <em>Analyzing a real AVC denial — from raw log to human-readable fix, in under a second.</em>
+</p>
 
 ---
 
