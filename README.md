@@ -33,6 +33,8 @@ When SELinux blocks something, most people either paste incomprehensible logs on
 - **Human-readable output** — tells you what happened, why it was blocked, and how to fix it without disabling SELinux
 - **Works everywhere SELinux does** — Fedora, RHEL, Rocky Linux, AlmaLinux, CentOS Stream
 
+> 💡 **TL;DR** — no daemon, no Python, no network. A single static binary that tells you what happened and how to fix it.
+
 ---
 
 ## 🚀 Installation
