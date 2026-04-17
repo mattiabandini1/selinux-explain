@@ -1,6 +1,6 @@
 [package]
 name = "selinux-explain"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2024"
 license = "MIT"
 description = "Translates SELinux AVC denials into plain English with actionable fix commands"
