@@ -36,5 +36,5 @@ install -d -m 755 %{buildroot}%{_sysconfdir}/selinux-explain
 %dir %{_sysconfdir}/selinux-explain
 
 %changelog
-* Sat Apr 18 2026 Mattia Bandini <mattia.bandini.mb1@gmail.com> - 0.5.1-1
+* Sat Apr 18 2026 Mattia Bandini <mattiabandini.mb1@gmail.com> - 0.5.1-1
 - Initial COPR package release
