@@ -164,3 +164,43 @@ action = "execmem"
 tclass = "process"
 suggestion = "The web server is trying to execute memory that is both writable and executable. This is often required by certain language runtimes (like Node.js, Mono, or JIT compilers) running within the web server."
 fix = "sudo setsebool -P httpd_execmem 1"
+
+# 21. nginx reads files from a non-standard document root
+[[rules]]
+source_type = "httpd_t"
+action = "read"
+tclass = "lnk_file"
+suggestion = "The web server is trying to follow a symbolic link that is not labeled correctly. This often happens with symlinked document roots or custom nginx configurations."
+fix = "sudo setsebool -P httpd_read_user_content 1  # or relabel the target: sudo restorecon -Rv /path/to/symlink/target"
+
+# 22. Redis/Valkey writing to a custom data directory
+[[rules]]
+source_type = "redis_t"
+action = "write"
+tclass = "dir"
+suggestion = "Redis (or Valkey) is trying to write to a directory that is not labeled redis_var_lib_t. This happens when the data directory is changed from the default /var/lib/redis."
+fix = "sudo semanage fcontext -a -t redis_var_lib_t \"/new/data/dir(/.*)?\" && sudo restorecon -R /new/data/dir"
+
+# 23. Nginx/Apache connecting to a backend on a non-standard port (reverse proxy)
+[[rules]]
+source_type = "httpd_t"
+action = "name_connect"
+tclass = "tcp_socket"
+suggestion = "The web server is trying to connect to a backend service (reverse proxy). If the backend runs on a non-standard port, SELinux may block it even with httpd_can_network_connect enabled."
+fix = "sudo semanage port -a -t http_port_t -p tcp <BACKEND_PORT>  # then: sudo setsebool -P httpd_can_network_relay 1"
+
+# 24. journald / rsyslog writing to a custom log path
+[[rules]]
+source_type = "syslogd_t"
+action = "write"
+tclass = "dir"
+suggestion = "The syslog daemon is trying to write logs to a custom directory that lacks the var_log_t label."
+fix = "sudo semanage fcontext -a -t var_log_t \"/custom/log/dir(/.*)?\" && sudo restorecon -R /custom/log/dir"
+
+# 25. Git daemon / Gitea reading repositories in a custom path
+[[rules]]
+source_type = "git_daemon_t"
+action = "read"
+tclass = "dir"
+suggestion = "The Git daemon is trying to read a repository directory that is not labeled git_content_t. This happens when repositories are stored outside /var/lib/git."
+fix = "sudo semanage fcontext -a -t git_content_t \"/your/repos(/.*)?\" && sudo restorecon -R /your/repos"
