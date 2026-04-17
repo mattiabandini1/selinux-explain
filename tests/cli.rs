@@ -52,6 +52,7 @@ fn test_pipe_no_avc_input() {
     let mut child = Command::new(env!("CARGO_BIN_EXE_selinux-explain"))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("Failed to spawn process");
 
@@ -63,7 +64,7 @@ fn test_pipe_no_avc_input() {
     });
 
     let output = child.wait_with_output().expect("Failed to read stdout");
-    let output_str = String::from_utf8_lossy(&output.stdout);
+    let stderr_str = String::from_utf8_lossy(&output.stderr);
 
-    assert!(output_str.contains("No SELinux denials found"), "Expected no-match message, got: {}", output_str);
+    assert!(stderr_str.contains("No SELinux denials found"), "Expected no-match message, got: {}", stderr_str);
 }
