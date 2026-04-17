@@ -92,3 +92,75 @@ action = "read"
 tclass = "file"
 suggestion = "sshd is trying to read a file (likely SSH keys or authorized_keys) with the wrong SELinux label. This can block key-based authentication."
 fix = "restorecon -Rv ~/.ssh\n# If keys are in a custom location:\n# sudo semanage fcontext -a -t ssh_home_t \"/custom/path(/.*)?\" && sudo restorecon -R /custom/path"
+
+# 12. PostgreSQL with a moved data directory
+[[rules]]
+source_type = "postgresql_t"
+action = "write"
+tclass = "dir"
+suggestion = "PostgreSQL is trying to write to a directory that is not labeled postgresql_db_t. This usually happens when the data directory is moved from the default /var/lib/pgsql."
+fix = "sudo semanage fcontext -a -t postgresql_db_t \"/new/data/dir(/.*)?\" && sudo restorecon -R /new/data/dir"
+
+# 13. PostgreSQL attempts to bind to a non-standard port
+[[rules]]
+source_type = "postgresql_t"
+action = "name_bind"
+tclass = "tcp_socket"
+suggestion = "PostgreSQL is trying to bind to a port not labeled for PostgreSQL. This happens when using a non-default port (default is 5432)."
+fix = "sudo semanage port -a -t postgresql_port_t -p tcp <PORT>"
+
+# 14. Postfix/Sendmail reading custom SSL certificates
+[[rules]]
+source_type = "postfix_master_t"
+action = "read"
+tclass = "file"
+suggestion = "The Postfix mail server is trying to read a file (likely an SSL/TLS certificate) with the wrong SELinux label. Certs usually need the cert_t label."
+fix = "sudo semanage fcontext -a -t cert_t \"/path/to/certs(/.*)?\" && sudo restorecon -R /path/to/certs"
+
+# 15. BIND (named) writing to dynamic zone files
+[[rules]]
+source_type = "named_t"
+action = "write"
+tclass = "file"
+suggestion = "The BIND DNS server (named) is trying to write to a zone file, but the label is incorrect. Master or dynamic zones need the named_zone_t or named_cache_t label, and usually belong in /var/named/dynamic."
+fix = "sudo semanage fcontext -a -t named_zone_t \"/path/to/zone/file\" && sudo restorecon -v /path/to/zone/file"
+
+# 16. Container Engine (Docker/Podman daemon) accessing custom configs/sockets
+[[rules]]
+source_type = "container_engine_t"
+action = "read"
+tclass = "file"
+suggestion = "The container engine daemon (Docker or Podman) is trying to read a configuration file or socket with an incorrect label. This can happen if daemon.json or custom sockets are placed in non-standard directories."
+fix = "sudo restorecon -Rv /path/to/config_or_socket  # If custom, you may need to define a new context like container_config_t"
+
+# 17. systemd fails to read a custom unit file
+[[rules]]
+source_type = "init_t"
+action = "read"
+tclass = "file"
+suggestion = "systemd (init_t) is trying to read a custom service/unit file, but it lacks the systemd_unit_file_t label. This happens when copying unit files into /etc/systemd/system/ from a user home directory."
+fix = "sudo restorecon -Rv /etc/systemd/system/your-service.service"
+
+# 18. Chrony/NTP reading custom keys or config
+[[rules]]
+source_type = "chronyd_t"
+action = "read"
+tclass = "file"
+suggestion = "The Chrony NTP daemon is trying to read a configuration or key file that is not labeled chrony_keys_t or chronyd_conf_t."
+fix = "sudo restorecon -Rv /etc/chrony.keys /etc/chrony.conf  # Or apply chronyd_conf_t to your custom path"
+
+# 19. Audit daemon writing to a custom log directory
+[[rules]]
+source_type = "auditd_t"
+action = "write"
+tclass = "dir"
+suggestion = "The audit daemon (auditd) is trying to write logs to a custom directory that lacks the auditd_log_t label."
+fix = "sudo semanage fcontext -a -t auditd_log_t \"/custom/audit/log(/.*)?\" && sudo restorecon -R /custom/audit/log"
+
+# 20. Web server requires execmem (Boolean mapping example)
+[[rules]]
+source_type = "httpd_t"
+action = "execmem"
+tclass = "process"
+suggestion = "The web server is trying to execute memory that is both writable and executable. This is often required by certain language runtimes (like Node.js, Mono, or JIT compilers) running within the web server."
+fix = "sudo setsebool -P httpd_execmem 1"
