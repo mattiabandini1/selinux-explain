@@ -1,0 +1,32 @@
+name: Release Factory
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build-and-upload:
+    name: Compila e Pubblica
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      - name: Setup Toolchain Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Compilazione in Release Mode
+        run: cargo build --release
+
+      - name: Rinomina il binario
+        run: mv target/release/selinux-explain selinux-explain-linux-amd64
+
+      - name: Pubblica su GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: selinux-explain-linux-amd64
+          generate_release_notes: true
