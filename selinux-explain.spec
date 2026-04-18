@@ -1,5 +1,5 @@
 Name:           selinux-explain
-Version:        0.5.1
+Version:        0.5.2
 Release:        1%{?dist}
 Summary:        A CLI tool to explain SELinux denials and provide actionable fixes
 
