@@ -39,7 +39,16 @@ When SELinux blocks something, most people either paste incomprehensible logs on
 
 ## 🚀 Installation
 
-### Download pre-compiled binary (recommended)
+### Install via COPR (recommended for Fedora/RHEL)
+
+```bash
+sudo dnf copr enable matband/selinux-explain
+sudo dnf install selinux-explain
+```
+
+Supports Fedora 42, 43, 44 and EPEL 9, 10 (RHEL/CentOS/AlmaLinux/Rocky Linux).
+
+### Download pre-compiled binary
 
 Head to the [Releases page](https://github.com/mattiabandini1/selinux-explain/releases) and download the latest binary for your architecture, then:
 
@@ -104,7 +113,7 @@ If the denial has no matching rule, `--report` generates a pre-filled GitHub iss
 - [x] Pre-compiled binaries via GitHub Releases
 - [x] Extended suggestion engine via external `rules.toml`.
 - [x] `--report` flag to generate a ready-to-paste rule template for unmatched denials
-- [ ] RPM package / COPR repository
+- [x] RPM package / COPR repository
 
 ---
 
