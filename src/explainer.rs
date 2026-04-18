@@ -30,11 +30,9 @@ fn get_specific_advice(
     match (source_type, action, tclass) {
         // Case 1: Web server trying to READ files or directories
         ("httpd_t", "read" | "open" | "getattr", "file" | "dir") => {
-            format!(
                 "The web server is trying to read a file or directory labeled '{target_type}'.\n\
                 Fix its context with: `sudo restorecon -Rv </path/to/{target}>`\n\
-                Or set it manually: `sudo chcon -t httpd_sys_content_t </path/to/{target}>`"
-            )
+                Or set it manually: `sudo chcon -t httpd_sys_content_t </path/to/{target}>`".to_string()
         }
 
         // Case 2: Web server trying to CONNECT to a network socket
@@ -48,11 +46,9 @@ fn get_specific_advice(
 
         // Case 3: Containers (we use `_` because we care about ANY action blocked for containers)
         ("container_t", _, _) => {
-            format!(
                 "A container is trying to access a host resource.\n\
                  If you are mounting a volume, append ':z' or ':Z' to your volume path.\n\
-                 Example: `-v /host/path:/container/path:z`"
-            )
+                 Example: `-v /host/path:/container/path:z`".to_string()
         }
 
         // Default fallback for any other combination
