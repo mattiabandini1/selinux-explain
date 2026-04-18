@@ -30,19 +30,17 @@ fn get_specific_advice(
     match (source_type, action, tclass) {
         // Case 1: Web server trying to READ files or directories
         ("httpd_t", "read" | "open" | "getattr", "file" | "dir") => {
-            "The web server is trying to read a file or directory labeled '{target_type}'.\n\
+           format!( "The web server is trying to read a file or directory labeled '{target_type}'.\n\
                 Fix its context with: `sudo restorecon -Rv </path/to/{target}>`\n\
                 Or set it manually: `sudo chcon -t httpd_sys_content_t </path/to/{target}>`"
-                .to_string()
+           )
         }
 
         // Case 2: Web server trying to CONNECT to a network socket
         ("httpd_t", "name_connect", "tcp_socket") => {
-            format!(
-                "The web server is trying to make an outbound network connection.\n\
+                 "The web server is trying to make an outbound network connection.\n\
                  By default, SELinux blocks this. To allow it, run:\n\
-                 `sudo setsebool -P httpd_can_network_connect 1`"
-            )
+                 `sudo setsebool -P httpd_can_network_connect 1`".to_string()
         }
 
         // Case 3: Containers (we use `_` because we care about ANY action blocked for containers)
