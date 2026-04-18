@@ -1,8 +1,8 @@
-use std::io::{self, Read, IsTerminal};
 use colored::Colorize;
+use std::io::{self, IsTerminal, Read};
 
-mod parser;
 mod explainer;
+mod parser;
 mod reader;
 mod rules;
 
@@ -33,36 +33,36 @@ fn process_and_explain_log(log_line: &str, report: bool) {
     match parsed_result {
         Some(data) => {
             explainer::print_explanation(&data, report);
-        },            
+        }
         None => {
             eprintln!("Could not parse the log. Are you sure it is a valid SELinux AVC denial?");
         }
     }
-
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    if cli.last { 
+    if cli.last {
         let last_result = reader::get_last_denial("/var/log/audit/audit.log");
-        
+
         match last_result {
-            Ok(Some(text)) => { 
-                process_and_explain_log(&text, cli.report);    
-            },
+            Ok(Some(text)) => {
+                process_and_explain_log(&text, cli.report);
+            }
             Ok(None) => {
                 eprintln!("No SELinux denials found in the log file.");
-            },
+            }
             Err(e) => {
                 // This happens if the OS blocks us (e.g., missing sudo) or file doesn't exist
                 eprintln!("{} {}", "Error reading the log file:".red().bold(), e);
-                eprintln!("Tip: The audit.log file usually requires root privileges. Try running the command with 'sudo'.");
+                eprintln!(
+                    "Tip: The audit.log file usually requires root privileges. Try running the command with 'sudo'."
+                );
             }
         }
-    
-    } else if let Some(text) = cli.log_text { 
-            process_and_explain_log(&text, cli.report);
+    } else if let Some(text) = cli.log_text {
+        process_and_explain_log(&text, cli.report);
     } else if !io::stdin().is_terminal() {
         let mut input = String::new();
 
@@ -84,7 +84,6 @@ fn main() {
         if !found {
             eprintln!("No SELinux denials found in the piped input.");
         }
-
     } else {
         println!("No arguments provided!");
         println!("Tip: Use 'selinux-explain --help' to see available options.");

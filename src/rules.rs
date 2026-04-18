@@ -44,9 +44,8 @@ pub fn find_rule<'a>(
     action: &str,
     tclass: &str,
 ) -> Option<&'a Rule> {
-    rules.rules.iter().find(|r| {
-        r.source_type == source_type
-            && r.action == action
-            && r.tclass == tclass
-    })
+    rules
+        .rules
+        .iter()
+        .find(|r| r.source_type == source_type && r.action == action && r.tclass == tclass)
 }

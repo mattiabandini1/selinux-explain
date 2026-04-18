@@ -13,15 +13,25 @@ fn test_pipe_input_httpd_read() {
 
     let mut stdin = child.stdin.take().expect("Failed to open stdin");
     std::thread::spawn(move || {
-        stdin.write_all(mock_log.as_bytes()).expect("Failed to write to stdin");
+        stdin
+            .write_all(mock_log.as_bytes())
+            .expect("Failed to write to stdin");
     });
 
     let output = child.wait_with_output().expect("Failed to read stdout");
     let output_str = String::from_utf8_lossy(&output.stdout);
 
     // These strings must match what's actually in rules.toml for httpd_t + read + file
-    assert!(output_str.contains("wrong SELinux label"), "Expected rules.toml suggestion, got: {}", output_str);
-    assert!(output_str.contains("restorecon"), "Expected fix command, got: {}", output_str);
+    assert!(
+        output_str.contains("wrong SELinux label"),
+        "Expected rules.toml suggestion, got: {}",
+        output_str
+    );
+    assert!(
+        output_str.contains("restorecon"),
+        "Expected fix command, got: {}",
+        output_str
+    );
 }
 
 #[test]
@@ -37,14 +47,20 @@ fn test_pipe_input_no_match() {
 
     let mut stdin = child.stdin.take().expect("Failed to open stdin");
     std::thread::spawn(move || {
-        stdin.write_all(mock_log.as_bytes()).expect("Failed to write to stdin");
+        stdin
+            .write_all(mock_log.as_bytes())
+            .expect("Failed to write to stdin");
     });
 
     let output = child.wait_with_output().expect("Failed to read stdout");
     let output_str = String::from_utf8_lossy(&output.stdout);
 
     // Should hit the hardcoded fallback
-    assert!(output_str.contains("No specific advice"), "Expected fallback, got: {}", output_str);
+    assert!(
+        output_str.contains("No specific advice"),
+        "Expected fallback, got: {}",
+        output_str
+    );
 }
 
 #[test]
@@ -60,11 +76,17 @@ fn test_pipe_no_avc_input() {
 
     let mut stdin = child.stdin.take().expect("Failed to open stdin");
     std::thread::spawn(move || {
-        stdin.write_all(mock_log.as_bytes()).expect("Failed to write to stdin");
+        stdin
+            .write_all(mock_log.as_bytes())
+            .expect("Failed to write to stdin");
     });
 
     let output = child.wait_with_output().expect("Failed to read stdout");
     let stderr_str = String::from_utf8_lossy(&output.stderr);
 
-    assert!(stderr_str.contains("No SELinux denials found"), "Expected no-match message, got: {}", stderr_str);
+    assert!(
+        stderr_str.contains("No SELinux denials found"),
+        "Expected no-match message, got: {}",
+        stderr_str
+    );
 }

@@ -1,6 +1,6 @@
-use colored::Colorize;
 use crate::parser::AvcData;
 use crate::rules;
+use colored::Colorize;
 
 /// Helper function to extract the 3rd part of a SELinux context (the Type).
 /// Example: "system_u:system_r:httpd_t:s0" -> "httpd_t"
@@ -11,7 +11,14 @@ fn extract_type(context: &str) -> &str {
 }
 
 /// Returns specific actionable advice based on the combination of source type and action.
-fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_type: &str, target: &str, report: bool) -> String {
+fn get_specific_advice(
+    source_type: &str,
+    action: &str,
+    tclass: &str,
+    target_type: &str,
+    target: &str,
+    report: bool,
+) -> String {
     // Load rules with fallback: system path → local file → embedded binary
     let rules_file = rules::load_rules_with_fallback();
 
@@ -28,8 +35,8 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
                 Fix its context with: `sudo restorecon -Rv </path/to/{target}>`\n\
                 Or set it manually: `sudo chcon -t httpd_sys_content_t </path/to/{target}>`"
             )
-        },
-        
+        }
+
         // Case 2: Web server trying to CONNECT to a network socket
         ("httpd_t", "name_connect", "tcp_socket") => {
             format!(
@@ -37,8 +44,8 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
                  By default, SELinux blocks this. To allow it, run:\n\
                  `sudo setsebool -P httpd_can_network_connect 1`"
             )
-        },
-        
+        }
+
         // Case 3: Containers (we use `_` because we care about ANY action blocked for containers)
         ("container_t", _, _) => {
             format!(
@@ -46,7 +53,7 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
                  If you are mounting a volume, append ':z' or ':Z' to your volume path.\n\
                  Example: `-v /host/path:/container/path:z`"
             )
-        },
+        }
 
         // Default fallback for any other combination
         _ => {
@@ -59,13 +66,17 @@ fn get_specific_advice(source_type: &str, action: &str, tclass: &str, target_typ
             if report {
                 let url = generate_issue_url(source_type, action, tclass);
 
-                let link_text = "Click here to open GitHub and create new issue with this rule.".underline().bold();
+                let link_text = "Click here to open GitHub and create new issue with this rule."
+                    .underline()
+                    .bold();
                 let clickable_link = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, link_text);
 
                 advice.push_str(&format!(
                     "\n\n\n{}{}\n{}",
                     "⚠️ ".yellow(),
-                    "This denial has no rule yet. Help improve selinux-explain!".yellow().bold(),
+                    "This denial has no rule yet. Help improve selinux-explain!"
+                        .yellow()
+                        .bold(),
                     clickable_link
                 ));
             }
@@ -103,32 +114,32 @@ pub fn print_explanation(data: &AvcData, report: bool) {
     println!("\n{}", "💡 Suggestion:".green().bold());
     // Call our new helper function, passing the action as well!
     let advice = get_specific_advice(
-        source_type, 
+        source_type,
         data.action.as_str(),
         data.tclass.as_str(),
-        target_type, 
+        target_type,
         &data.target,
         report,
     );
-    
+
     // Print the tailored advice
-    println!("{}", advice);    
+    println!("{}", advice);
 }
 
 /// Minimal URL encoder for GitHub issue query parameters.
 fn url_encode(s: &str) -> String {
     s.replace('%', "%25")
-     .replace(' ', "%20")
-     .replace('\n', "%0A")
-     .replace('"', "%22")
-     .replace('[', "%5B")
-     .replace(']', "%5D")
-     .replace('#', "%23")
-     .replace(':', "%3A")
-     .replace('=', "%3D")
-     .replace('/', "%2F")
-     .replace('?', "%3F")
-     .replace('&', "%26")
+        .replace(' ', "%20")
+        .replace('\n', "%0A")
+        .replace('"', "%22")
+        .replace('[', "%5B")
+        .replace(']', "%5D")
+        .replace('#', "%23")
+        .replace(':', "%3A")
+        .replace('=', "%3D")
+        .replace('/', "%2F")
+        .replace('?', "%3F")
+        .replace('&', "%26")
 }
 
 /// Generates a pre-filled GitHub issue URL for a denial with no matching rule.

@@ -29,7 +29,8 @@ pub fn parse_avc_log(log_line: &str) -> Option<AvcData> {
     let tclass = captures.get(5)?.as_str().to_string();
 
     let name_re = Regex::new(r#"\bname="?([^"\s]+)"?"#).ok()?;
-    let target = name_re.captures(log_line)
+    let target = name_re
+        .captures(log_line)
         .and_then(|c| c.get(1))
         .map_or("unknown".to_string(), |m| m.as_str().to_string());
 
@@ -52,7 +53,7 @@ mod tests {
     fn test_parse_valid_avc_log() {
         // A raw string simulating a real SELinux denial
         let raw_log = r#"type=AVC msg=audit(1612345678.123:456): avc:  denied  { read } for  pid=1234 comm="nginx" name="index.html" dev="sda1" ino=12345 scontext=system_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:user_home_t:s0 tclass=file permissive=0"#;
-        
+
         // The expected struct we want our parser to build
         let expected = AvcData {
             process: "nginx".to_string(),
