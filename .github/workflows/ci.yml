@@ -1,0 +1,39 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-and-test:
+    name: Compilazione e Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      - name: Installazione Toolchain Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache delle dipendenze
+        uses: Swatinem/rust-cache@v2
+
+      - name: Controllo Formattazione
+        run: cargo fmt --all -- --check
+
+      - name: Compilazione (Check)
+        run: cargo check --verbose
+
+      - name: Esecuzione Test
+        run: cargo test --verbose
+
+      - name: Linting con Clippy
+        run: cargo clippy -- -D warnings
