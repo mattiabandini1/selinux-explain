@@ -7,7 +7,7 @@ description = "Translates SELinux AVC denials into plain English with actionable
 repository = "https://github.com/mattiabandini1/selinux-explain"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.6", features = ["derive"] }
 regex = "1.10"
 colored = "2.1"
 toml = "0.8"
